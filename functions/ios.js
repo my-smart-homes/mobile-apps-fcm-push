@@ -1,3 +1,12 @@
+// Apps built from the Home Assistant iOS app. My Smart Homes is one, under its
+// own bundle id; without it here its notifications lost their attachments,
+// actions, url and interruption level.
+const HOME_ASSISTANT_IOS_APP_IDS = ['io.robbie.HomeAssistant', 'com.yildiz.MySmartHomes'];
+
+function isHomeAssistantIOSApp(appId) {
+  return HOME_ASSISTANT_IOS_APP_IDS.some(id => (appId || '').indexOf(id) > -1);
+}
+
 module.exports = {
   createPayload: function createPayload(req) {
     let payload = {
@@ -40,7 +49,7 @@ module.exports = {
 
     var updateRateLimits = true;
 
-    if (req.body.registration_info.app_id.indexOf('io.robbie.HomeAssistant') > -1) {
+    if (isHomeAssistantIOSApp(req.body.registration_info.app_id)) {
       // Enable old SNS iOS specific push setup.
       if (req.body.message === 'request_location_update' || req.body.message === 'request_location_updates') {
         payload.notification = {};
