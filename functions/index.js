@@ -20,7 +20,7 @@ const logging = new Logging();
 const debug = isDebug();
 const MAX_NOTIFICATIONS_PER_DAY = 500;
 
-const region = functions.config().app && functions.config().app.region || "us-central1";
+const region = runtimeConfig().app && runtimeConfig().app.region || "us-central1";
 const regionalFunctions = functions.region(region).runWith({ timeoutSeconds: 10 });
 
 exports.androidV1 = regionalFunctions.https.onRequest(async (req, res) => {
@@ -160,8 +160,14 @@ async function handleRequest(req, res, payloadHandler) {
 
 }
 
+// functions.config() exists only on 1st gen and throws on 2nd gen, where the
+// same handlers also run (mshIOSV1); there the defaults apply.
+function runtimeConfig() {
+  return process.env.K_CONFIGURATION ? {} : functions.config();
+}
+
 function isDebug() {
-  let conf = functions.config();
+  let conf = runtimeConfig();
   if (conf.debug){
     return conf.debug.local;
   }
